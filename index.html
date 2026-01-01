@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qahramon Sayyid - Shoir</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Orqa fondagi aylanuvchi nur animatsiyasi */
+@keyframes rotate-glow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Urib turuvchi (puls) effekti */
+@keyframes pulse-border {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.02); opacity: 1; }
+}
+
+.animate-rotate-glow {
+    animation: rotate-glow 12s linear infinite;
+}
+
+.animate-pulse-slow {
+    animation: pulse-border 8s ease-in-out infinite;
+}
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.music-playing {
+    animation: spin-slow 5s linear infinite;
+}
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Lucide Icons - oddiy SVG sifatida
+        const Camera = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        );
+        
+        const Video = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+        );
+        
+        const Mail = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+        );
+        
+        const Send = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+        );
+        
+        const Calendar = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+        );
+        
+        const Award = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+        );
+        
+        const Book = () => (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+        );
+
+        const Instagram = () => (
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+            </svg>
+        );
+
+        const Youtube = () => (
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+        );
+        
+        function QahramonSayyidWebsite() {
+            const [isPlaying, setIsPlaying] = useState(false);
+const audioRef = React.useRef(null);
+
+const toggleMusic = () => {
+    if (isPlaying) {
+        audioRef.current.pause();
+    } else {
+        audioRef.current.play();
+    }
+    setIsPlaying(!isPlaying);
+};
+            const [selectedBlog, setSelectedBlog] = React.useState(null);
+            const [isAdmin, setIsAdmin] = React.useState(false); // Bu boshida "false" (ya'ni admin emas) bo'ladi
+            const [activeSection, setActiveSection] = useState('dashboard');
+            const [isScrolled, setIsScrolled] = useState(false);
+            const [selectedGalleryItem, setSelectedGalleryItem] = useState(null);
+            const [selectedAboutModal, setSelectedAboutModal] = useState(null);
+            
+            // Galereya rasmlari ma'lumotlari
+            const [galleryImages] = useState([
+                { id: 1, url: "qaha2.jpg", title: "Yilning eng faol talabasi – 2025” respublika ko‘rik-tanlovi " },
+                { id: 2, url: "qaha3.jpg", title: "Rasm 2" },
+                { id: 3, url: "qaha4.jpg", title: "Rasm 3" },
+                { id: 4, url: "qaha5.jpg", title: "Rasm 4" },
+                { id: 5, url: "qaha6.jpg", title: "Rasm 5" },
+                { id: 6, url: "qaha10.jpg", title: "Rasm 6" },
+                // Qo'shimcha rasmlarni shu yerga qo'shing
+            ]);
+            
+            // Galereya videolari ma'lumotlari (har bir video o'z cover va aspect ratio bilan)
+            const [galleryVideos] = useState([
+                { 
+                    id: 1, 
+                    url: "video2.mp4", 
+                    cover: "cover2.jpg", // Video cover rasmi
+                    title: "Harakatdan to'xtama",
+                    aspectRatio: "9/16" // Video aspect ratio (masalan: "16/9", "4/3", "9/16")
+                },
+                { 
+                    id: 2, 
+                    url: "kitob.mp4", 
+                    cover: "kitobc.jpg",
+                    title: "Xayolimda gullagan chechak kitobi",
+                    aspectRatio: "9/16"
+                },
+                { 
+                    id: 3, 
+                    url: "video3.mov", 
+                    cover: "cover3.jpg",
+                    title: "Kitob taqdimoti",
+                    aspectRatio: "9/16"
+                },
+                // Qo'shimcha videolarni shu yerga qo'shing
+            ]);
+            
+            // She'rlar ma'lumotlari
+            const [poems] = useState([
+                {
+                    id: 1,
+                    title: "PULING BOʻLMASA",
+                    excerpt: "Dunyo shunday ekan, nima ham derdik...",
+                    image: "poem1.jpg", // Money/coins
+                    date: "2025-01-20",
+                    fullPoem: "Dunyo shunday ekan, nima ham derdik,\nUmidlar soʻnadi, omad kulmasa.\nHatto tashlab ketar ishonganlaring,\nAgarda yoningda puling boʻlmasa.\n\nHolingni soʻrab qoʻymaydi hech kim,\nKibor davralarda oʻtirasan jim.\nBesh kunlik dunyoda topmaysan tinim,\nAgarda yoningda puling boʻlmasa.\n\nMoʻltirab qoʻlingga qaraydi bolang,\nHech bir kamlarini aytolmas onang.\nHar dardu tashvishga tayanchdir otang,\nAgarda yoningda puling boʻlmasa.\n\nTansiq taom qayda, hashamat qayda,\nShodlikka burkangan, farog'at qayda.\nQancha chiranmagin bari befoyda, \nAgarda yoningda puling boʻlmasa.\n\nKimni ham birovga rahmi kelardi,\nTekinga kimni ham foydasi tegardi.\nUch-toʻrt soʻm pulga nima berardi,\nAgarda yoningda puling boʻlmasa.\n\nIzlanib yashagin, talpinib yasha,\nGʻaflatli damlarni ortingga tashla.\nRizqingni izlashni hozirdan boshla,\nQiynalib qolasan, puling boʻlmasa."
+                },
+                {
+                    id: 2,
+                    title: "USTOZLAR BO'LMASA QAYDAN BILAMIZ",
+                    excerpt: "Navoiy kim bo'lgan Mashrab kim boʻlgan...",
+                    image: "poem2.jpg", // Books/library
+                    date: "2025-01-18",
+                    fullPoem: "Navoiy kim bo'lgan Mashrab kim boʻlgan,\nUstozsiz bu dunyo mudom jim bo'lgan,\nSohibqiron bobom Vatan deb oʻtgan,\nUstozlar boʻlmasa qaydan bilamiz.\n\nSharq qaysi tomon-u g'arb qaysi tomon,\nO'tmish qanday edi, bu qanday zamon.\nUstozga shogirddir har qaysi inson,\nUstozlar boʻlmasa qaydan bilamiz.\n\nNurlarga yo'g'rilgan dono so'zlarni,\nEzgulik yo'liga tushgan izlarni.\nUstosiz kim odam qilar bizlarni,\nUstozlar boʻlmasa qaydan bilamiz.\n\nOna mo'tabar-u ota ulug' zot,\nVatan bag'ri cheksiz biz uchun qanot.\nUstozga ta'zimda yashang umrbod,\nUstozlar boʻlmasa qaydan bilamiz."
+                },
+                {
+                    id: 3,
+                    title: "ODAMZOT",
+                    excerpt: "Kimdir ayyor, kimdir hiylakor...",
+                    image: "poem3.jpg", // People/crowd
+                    date: "2025-01-15",
+                    fullPoem: "Kimdir ayyor, kimdir hiylakor,\nBirov haqqin yemoqqa tayyor.\nAlloh oʻzi boʻlsin madadkor,\nOdamlarga nima boʻlyapti.\n\nBiri zoʻrman, tanhoman deydi,\nBiri esa men haqman deydi,\nBir-birini etini yeydi,\nOdamlarga nima boʻlyapti\n\nPul afzalroq, jigar begona,\nOqibat-ku boʻldi afsona.\nMehr topilmaydi bitta dona,\nOdamlarga nima boʻlyapti.\n\nDilni aldab kulib yuramiz,\nNohaqlikka qarab turamiz.\nAdolatni chetga suramiz,\nOdamlarga nima boʻlyapti.\n\nDoʻst degani nomard chiqadi,\nSirlarini oshkor qiladi.\nGoʻyo senga kafan tikadi,\nOdamlarga nima boʻlyapti."
+                },
+                {
+                    id: 4,
+                    title: "ZAMON EMAS ODAM OʻZGARDI",
+                    excerpt: "Kimdir gʻarib, kimdir zodagon...",
+                    image: "poem4.jpg", // Time/change
+                    date: "2025-01-12",
+                    fullPoem: "Kimdir gʻarib, kimdir zodagon,\nKimlar boʻldi dunyoga sulton.\nAyb qidir oʻzingdan, ey inson,\nZamon emas, odam oʻzgardi.\n\nHashamatli bahaybat uylar,\nToʻlib toshgan dabdaba toʻylar.\nOgʻzi qiyshiq koʻpaydi boylar,\nZamon emas, odam oʻzgardi.\n\nDonolar kam, nodonlar bisyor,\nHar qadamda uchraydi ayyor.\nBirov haqqin yemoqqa tayyor,\nZamon emas, odam oʻzgardi."
+                },
+                {
+                    id: 5,
+                    title: "ONA",
+                    excerpt: "Borligida qadrlang dildan...",
+                    image: "poem5.jpg", // Mother/family
+                    date: "2025-01-10",
+                    fullPoem: "Borligida qadrlang dildan,\nDuosini boshga toj biling.\nChin dunyoda avaylab, chindan,\nOnangizni ehtiyot qiling!\n\nYiroq ketmang bir dam yonidan,\nSizni yaratgan u jonidan,\nXabar olib turing holidan,\nOnangizni ehtiyot qiling!\n\nOna bor uy -- jannatga makon,\nU minnatni bilmas hech qachon,\nGulday nozik, farishtaday jon --\nOnangizni ehtiyot qiling!\n\nDard chekkanda hamdardi boʻlib,\nTashvishlarni bir chetga qoʻyib,\nDiydoriga har lahza toʻyib,\nOnangizni ehtiyot qiling!\n\nDunyo -- boqiy turguvchi mezbon,\nOna unda bir damlik mehmon,\nSizni jonim, degan jonajon\nOnangizni ehtiyot qiling!\n\nOna borki, yashaysiz magʻrur,\nShodliklardan sarafroz, masrur,\nSizga hayot bagʻishlagan ul\nOnangizni ehtiyot qiling!\n\nBukilmasin alifday qaddi,\nBaland boʻlsin hamisha qadri,\nU dunyo-yu bu dunyo haqi\nOnangizni ehtiyot qiling!"
+                },
+                {
+                    id: 6,
+                    title: "ONA ROZIMISIZ",
+                    excerpt: "Kamol topdim bag'ringizda...",
+                    image: "poem6.jpg", // Mother and child
+                    date: "2025-01-08",
+                    fullPoem: "Kamol topdim bag'ringizda,\nQanot yoydim bag'ringizda,\nHoldan toygan chog'ingizda,\nOna, mendan rozimisiz?\n\nYoshlikdagi g'aflatimdan,\nGo'dakligim sho'xligimdan.\nShoshma-shoshar qilig'imdan,\nOna, mendan rozimisiz?\n\nGoho nodon xayol surdim,\nSizga qanday farzand boʻldim.\nYuzingizda ajin koʻrdim,\nOna, mendan rozimisiz?\n\nKeling, mahkam quchib olay,\nSof mehrga to'yib olay.\nPoyingizda qurbon boʻlay,\nOna, mendan rozimisiz?\n\nTer to'kibsiz dala-dashtda,\nPeshqadamsiz har bir ishda.\nKo'nglim notinch, biroz g'ashda,\nOna, mendan rozimisiz?\n\nMen natavon boʻldim tanbal,\nO'ylab yurdim o'zim har gal.\nShu yuzimga ayting dangal,\nOna, mendan rozimisiz?"
+                },
+                {
+                    id: 7,
+                    title: "NAMANGANDANMAN",
+                    excerpt: "Qay yurtda bo'lmayin, hamisha har on...",
+                    image: "poem7.jpg", // Mountains/landscape
+                    date: "2025-01-05",
+                    fullPoem: "Qay yurtda bo'lmayin, hamisha har on,\nShu aziz Vatanni jondan sevaman.\nSuvlari ziloldek, tuprog'i bo'ston,\nVodiyni yuragi — Namangandanman.\n\nOlmalari totli Yangiqo'rg'onim,\nChust, Norin, Pop, To'raqo'rg'onim.\nDunyoga mashhurdir aziz Chortog'im,\nVodiyni yuragi — Namangandanman.\n\nTaraladi buyuklarning nafasi,\nJaranglaydi go'zal bulbul nidosi.\nKo'rkam vodiy — Allohimning mo'jizasi,\nVodiyni yuragi — Namangandanman.\n\nMa'rifat mash'ali, Is'hoqxon Ibrat,\nHar yurtda qozongan e'tibor, hurmat.\nHech qachon qalbimda so'nmas muhabbat,\nVodiyni yuragi — Namangandanman."
+                },
+                {
+                    id: 8,
+                    title: "HAR KIMNING DARDI",
+                    excerpt: "Hech kimga hech qachon oson tutmanglar...",
+                    image: "poem8.jpg", // Sadness/pain
+                    date: "2025-01-03",
+                    fullPoem: "Hech kimga hech qachon oson tutmanglar,\nHar kimning ichida turfa dardi bor.\nHech kimdan hech qachon umid kutmanglar,\nChunki har odamda ming xil tashvish bor.\n\nBa'zida yuz kulib, yuraklar yig'lar,\nTabassum ortida g'amli iztirob.\nSokin ko'ringanlar ko'p dardli bo'lar,\nKo'nglida jim yonar olovli azob."
+                },
+                {
+                    id: 9,
+                    title: "QIZ QADRINI BILMAGANLAR",
+                    excerpt: "Qiz qadrini bilganlar bor, bilmagan bor...",
+                    image: "poem9.jpg", // Girl/woman
+                    date: "2024-12-30",
+                    fullPoem: "Qiz qadrini bilganlar bor, bilmagan bor,\nO'g'il tilab oilasin buzganlar bor.\nHar ne'matni hadya qilar Qodir Alloh,\nYillar bo'yi tirnoqqa zor o'tganlar bor.\n\nQiz bor uyda jannat hidi anqib turar,\nYuzlaridan baxt nuri ham yog'ib turar.\nQiz yo'q joyda farishtalar jimdek yotar,\nO'g'lim yo'q deb armon bilan yurganlar bor,\nQariganda qadr topmay qolganlar bor."
+                },
+                {
+                    id: 10,
+                    title: "TINCHLIK NIDOSI",
+                    excerpt: "Mehmonmiz besh kunlik dunyoda...",
+                    image: "poem10.jpg", // Peace/dove
+                    date: "2024-12-28",
+                    fullPoem: "Mehmonmiz besh kunlik dunyoda,\nToabad yashaylik duoda.\nJasadlar jim yotar maydonda,\nIltimos, urushni to'xtating!\n\nQo'rqinglar Allohning qahridan,\nHiylakor nomardning zahridan.\nQochinglar shaytonning makridan,\nIltimos, urushni to'xtating!\n\nSarsonu sargardon bo'ldilar,\nNokaslar zulmidan o'ldilar.\nOdamlar g'am-dardga to'ldilar,\nIltimos, urushni to'xtating!\n\nKo'klarda go'daklar nolasi,\nMo'ltirab ko'zlarin jolasi.\nBo'lsangiz odamning bolasi,\nIltimos, urushni to'xtating!\n\nZirhlangan qurolli jangchilar,\nDahshatli bahaybat tankchilar,\nBu qayg'u yurakka sanchilar.\nIltimos, urushni to'xtating!\n\nGul ochgan zaminlar so'lmasin,\nTuproqlar qonlarga to'lmasin,\nBu dunyo vayrona bo'lmasin,\nIltimos, urushni to'xtating!"
+                },
+                {
+                    id: 11,
+                    title: "ONA TABIAT",
+                    excerpt: "Har maysa, har yaproq ming dardga davo...",
+                    image: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&q=80",
+                    date: "2024-12-25",
+                    fullPoem: "Har maysa, har yaproq ming dardga davo,\nXudoyim yaratgan eng go'zal xilqat.\nSen bilan tirikdir bu qadim dunyo,\nBuyuk mo'jizasan, ona-tabiat.\n\nMayin sabolaring sochlarim silar,\nRuhimni egallar sohir kayfiyat,\nToza nafasingdan yayraydi dillar,\nBuyuk mo'jizasan, ona-tabiat.\n\nTo'rt fasling har birin oʻz ziynati bor,\nKuzingda ham hokim bahoriy ziynat.\nYozing saxiy kelar qishda bersang qor,\nBuyuk mo'jizasan, ona-tabiat.\n\nSen borsan -- hayot bor, onam singari\nSeni asrash menga eng oliy niyat.\nBashar talpinadi mangu sen sari,\nBuyuk mo'jizasan, ona-tabiat.\n\nTo quyosh porlarkan falak toqida,\nHech zavol ko'rmagin, yashnab tur har vaqt.\nBir dilbar ohangsan ko'nglim torida,\nBuyuk mo'jizasan, ona-tabiat."
+                }
+            ]);
+            
+            // Blog ma'lumotlari (alohida) - 10 ta
+            const [blogPosts] = useState([
+                {
+                    id: 1,
+                    title: "Mening birinchi blog yozuvim",
+                    excerpt: "Bu yerda blog yozuvi qisqa tavsifi bo'ladi...",
+                    image: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&q=80",
+                    date: "2025-01-15",
+                    fullContent: "Bu yerda blog yozuvining to'liq matni bo'ladi. Siz bu qismga o'zingizning blog yozuvlaringizni qo'shishingiz mumkin.\n\nBlog yozuvlari she'rlardan farq qiladi. Bu yerda ijodiy fikrlar, tajribalar, hikoyalar va boshqa mazmunlar bo'lishi mumkin."
+                },
+                {
+                    id: 2,
+                    title: "Ijodiy jarayon haqida",
+                    excerpt: "Ijodkorlik qanday rivojlanadi va nima kerak...",
+                    image: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80",
+                    date: "2025-01-10",
+                    fullContent: "Ijodiy jarayon - bu qalb va aqlning uyg'unligi. Har bir she'r yoki yozuv o'z tarixiga ega. Men har kuni yangi g'oyalarni qidirib, ularni qog'ozga tushiraman."
+                },
+                {
+                    id: 3,
+                    title: "She'r yozish san'ati",
+                    excerpt: "She'r yozish - bu qalb bilan ishlash san'ati...",
+                    image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&q=80",
+                    date: "2025-01-08",
+                    fullContent: "She'r yozish - bu qalb bilan ishlash san'ati. Har bir so'z tanlab, har bir qatorni tartib bilan yozish kerak. Bu juda qiziqarli va ruhni ozod qiluvchi jarayon."
+                },
+                {
+                    id: 4,
+                    title: "Talabalik hayotidan lavhalar",
+                    excerpt: "Universitet hayoti - bu o'rganish va rivojlanish davri...",
+                    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80",
+                    date: "2025-01-05",
+                    fullContent: "Universitet hayoti - bu o'rganish va rivojlanish davri. Men huquqshunoslik yo'nalishida tahsil olmoqdaman va shu bilan birga ijodiy faoliyatimni ham davom ettirmoqdaman."
+                },
+                {
+                    id: 5,
+                    title: "Kitob nashr qilish tajribasi",
+                    excerpt: "Kitobimni nashr qilish - bu katta orzu edi...",
+                    image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=800&q=80",
+                    date: "2025-01-03",
+                    fullContent: "Kitobimni nashr qilish - bu katta orzu edi va endi u amalga oshdi. Namangan Mashrab va Amazon Lulu nashriyotlari orqali kitoblarim chiqdi. Bu mening uchun katta muvaffaqiyat."
+                },
+                {
+                    id: 6,
+                    title: "Ijtimoiy tarmoqlarda faoliyat",
+                    excerpt: "Zamonaviy shoir bo'lish uchun ijtimoiy tarmoqlar muhim...",
+                    image: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80",
+                    date: "2024-12-28",
+                    fullContent: "Zamonaviy shoir bo'lish uchun ijtimoiy tarmoqlar muhim. Men Telegram, Instagram va YouTube orqali o'z ijodimni muxlislarim bilan baham ko'raman."
+                },
+                {
+                    id: 7,
+                    title: "Huquqiy savodxonlik loyihasi",
+                    excerpt: "Aholining huquqiy bilimini oshirish - bu mening vazifam...",
+                    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=800&q=80",
+                    date: "2024-12-25",
+                    fullContent: "Aholining huquqiy bilimini oshirish - bu mening vazifam. Men huquqiy savodxonlik bo'yicha keng ko'lamli targ'ibot ishlarini olib bormoqdaman."
+                },
+                {
+                    id: 8,
+                    title: "Mukofotlar va e'tirof",
+                    excerpt: "Mening ijodim ko'p mukofotlar bilan taqdirlandi...",
+                    image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&q=80",
+                    date: "2024-12-20",
+                    fullContent: "Mening ijodim ko'p mukofotlar bilan taqdirlandi. 'Ijodiy izlanishdagi yosh' ko'krak nishoni, 'Yilning eng faol ijodkor talabasi' nominatsiyasi va respublika bosqichi g'olibi - bularning barchasi mening faoliyatimning natijasidir."
+                },
+                {
+                    id: 9,
+                    title: "Kelajakdagi rejalar",
+                    excerpt: "Kelajakda men yanada ko'p ishlarni amalga oshirmoqchiman...",
+                    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80",
+                    date: "2024-12-15",
+                    fullContent: "Kelajakda men yanada ko'p ishlarni amalga oshirmoqchiman. Yangi kitoblar, she'rlar, blog yozuvlari va ijodiy loyihalar - bularning barchasi rejalarimda bor."
+                },
+                {
+                    id: 10,
+                    title: "Muxlislarga minnatdorchilik",
+                    excerpt: "Sizlar - mening eng katta quvvatim...",
+                    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80",
+                    date: "2024-12-10",
+                    fullContent: "Sizlar - mening eng katta quvvatim va ilhomim. Har bir muxlis, har bir izoh, har bir qo'llab-quvvatlash - bularning barchasi meni yangi ijodiy yozuvlar yozishga ilhomlantirmoqda. Sizlarga katta rahmat!"
+                }
+            ]);
+            
+            const [selectedPoem, setSelectedPoem] = useState(null);
+            
+            // Chatbot states
+            const [chatOpen, setChatOpen] = useState(false);
+            const [messages, setMessages] = useState([
+                { text: "Salom! Men Qahramon Sayyid haqida savollaringizga javob beraman. Nima bilmoqchisiz?", sender: 'bot' }
+            ]);
+            const [userInput, setUserInput] = useState('');
+
+            // Chatbot response function
+            const getBotResponse = (message) => {
+                const msg = message.toLowerCase();
+                if (msg.includes('ism') || msg.includes('kim')) {
+                    return "Mening to'liq ismim Qahramon Sattixo'jayev, taxallusim Qahramon Sayyid.";
+                } else if (msg.includes('yosh') || msg.includes('tug\'ilgan')) {
+                    return "Men 2004-yilda Namangan viloyati, Chortoq tumani, Alixon qishlog'ida tug'ilganman.";
+                } else if (msg.includes('ta\'lim') || msg.includes('universitet')) {
+                    return "Men Namangan Davlat Universiteti, Yuridik fakultetida 4-bosqich talabasiman.";
+                } else if (msg.includes('she\'r') || msg.includes('ijod')) {
+                    return "Men 2020-yillardan beri ijod qilaman. She'rlarim falsafiy mavzularda bo'ladi.";
+                } else if (msg.includes('mukofot') || msg.includes('muvaffaqiyat')) {
+                    return "Men 'Yilning eng faol talabasi – 2025' respublika ko'rik-tanlovida g'olibman.";
+                } else if (msg.includes('loyiha') || msg.includes('faoliyat')) {
+                    return "Men 'Talabalar Karvoni' jurnalida, 'Ijod Minbari' suhbat dasturida va 'Yosh Qalamkashlar Klubi'da faolman.";
+                } else if (msg.includes('kitob') || msg.includes('nashr')) {
+                    return "Mening she'rlarim Amazon Lulu nashriyotida 2025-yilda nashr etiladi.";
+                } else if (msg.includes('bog\'lanish') || msg.includes('contact') || msg.includes('aloqa')) {
+                    return "Men bilan bog'lanish uchun:\n📞 Telefon: +998 94 200 49 50\n📱 Telegram: https://t.me/Qahramon_sayyid\n📸 Instagram: https://www.instagram.com/qahramonsattixojayev?igsh=MTU1Z3MxcGw0bTIyYg==\n\nSavollaringiz bo'lsa, email: sattixojayevq@gmail.com";
+                } else {
+                    return "Kechirasiz, bu savolga javob bera olmayman. Boshqa savolingiz bormi? Aloqa uchun yuqoridagi ma'lumotlarni ishlating.";
+                }
+            };
+
+            const sendMessage = () => {
+                if (userInput.trim()) {
+                    setMessages([...messages, { text: userInput, sender: 'user' }]);
+                    const response = getBotResponse(userInput);
+                    setTimeout(() => {
+                        setMessages(prev => [...prev, { text: response, sender: 'bot' }]);
+                    }, 1000);
+                    setUserInput('');
+                }
+            };
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    setIsScrolled(window.scrollY > 50);
+                };
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollToSection = (section) => {
+                setActiveSection(section);
+                const element = document.getElementById(section);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-black text-white relative overflow-hidden">
+                    {/* Background Video */}
+                    {/* Background Video */}
+                    <div className="fixed inset-0 z-0">
+                        {/* Bu qatlam videoni ustini qoraytirib, matnlarni aniq ko'rsatadi */}
+                        <div className="absolute inset-0 bg-black/70 z-10"></div> 
+                        
+                        <video
+                            className="w-full h-full object-cover opacity-30" /* Opacity-30 videoni xira (kamroq ko'rinadigan) qiladi */
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                        >
+                            <source src="VIDEO_NOMI.mp4" type="video/mp4" /> {/* <--- BU YERGA videongiz nomini yozing */}
+                        </video>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-black/90 backdrop-blur-lg py-4' : 'bg-transparent py-6'}`}>
+                        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+                            <div className="text-2xl font-bold bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                                QAHRAMON SAYYID
+                            </div>
+                            <div className="hidden md:flex space-x-8">
+                                {['dashboard', 'about', 'poems', 'gallery', 'blog', 'contact'].map((section) => (
+                                    <button
+                                        key={section}
+                                        onClick={() => scrollToSection(section)}
+                                        className={`uppercase tracking-wider transition-all hover:text-amber-400 ${activeSection === section ? 'text-amber-400' : 'text-white'}`}
+                                    >
+                                        {section === 'dashboard' ? 'Bosh sahifa' : 
+                                         section === 'about' ? 'Haqida' :
+                                         section === 'poems' ? "She'rlar" :
+                                         section === 'gallery' ? 'Galereya' :
+                                         section === 'blog' ? 'Blog' : 'Aloqa'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Dashboard Section */}
+                    <section id="dashboard" className="relative z-10 min-h-screen py-20 px-6 pt-32">
+                        <div className="max-w-7xl mx-auto">
+                            <h1 className="text-5xl md:text-7xl font-bold mb-16 text-center bg-gradient-to-r from-amber-200 via-orange-300 to-red-400 bg-clip-text text-transparent">
+                                QAHRAMON SAYYID
+                            </h1>
+                            
+                            {/* Dashboard Grid - hamma qismlar */}
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                {/* Shoir rasmi va haqida */}
+                                <div 
+                                    onClick={() => setSelectedAboutModal('bio')}
+                                    className="bg-gradient-to-br from-amber-900/40 to-orange-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/30 hover:border-amber-500 cursor-pointer hover:scale-105 transition-all group"
+                                >
+                                    <div className="relative w-48 h-48 mx-auto mb-4">
+                                        <div className="absolute -inset-4 bg-gradient-to-tr from-amber-600 via-orange-500 to-red-600 rounded-full blur-xl opacity-30 animate-rotate-glow"></div>
+                                        <div className="relative inset-0 rounded-full border-4 border-amber-500 overflow-hidden">
+                                            <img 
+                                                src="qaha.jpg"
+                                                alt="Qahramon Sayyid" 
+                                                className="w-full h-full object-cover animate-pulse-slow"
+                                            />
+                                        </div>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-center text-amber-400 mb-2">Shoir haqida</h3>
+                                    <p className="text-center text-gray-300 text-sm">Biografiya va ma'lumotlar</p>
+                                </div>
+
+                                {/* She'rlar */}
+                                <div 
+                                    onClick={() => scrollToSection('poems')}
+                                    className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-lg p-6 rounded-2xl border border-purple-500/30 hover:border-purple-500 cursor-pointer hover:scale-105 transition-all group"
+                                >
+                                    <div className="flex justify-center mb-4 text-purple-400">
+                                        <Book className="w-16 h-16" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-center text-purple-400 mb-2">She'rlar</h3>
+                                    <p className="text-center text-gray-300 text-sm">{poems.length} ta she'r</p>
+                                </div>
+
+                                {/* Blog */}
+                                <div 
+                                    onClick={() => scrollToSection('blog')}
+                                    className="bg-gradient-to-br from-blue-900/40 to-cyan-900/40 backdrop-blur-lg p-6 rounded-2xl border border-blue-500/30 hover:border-blue-500 cursor-pointer hover:scale-105 transition-all group"
+                                >
+                                    <div className="flex justify-center mb-4 text-blue-400">
+                                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-center text-blue-400 mb-2">Blog</h3>
+                                    <p className="text-center text-gray-300 text-sm">{blogPosts.length} ta yozuv</p>
+                                </div>
+
+                                {/* Galereya */}
+                                <div 
+                                    onClick={() => scrollToSection('gallery')}
+                                    className="bg-gradient-to-br from-green-900/40 to-emerald-900/40 backdrop-blur-lg p-6 rounded-2xl border border-green-500/30 hover:border-green-500 cursor-pointer hover:scale-105 transition-all group"
+                                >
+                                    <div className="flex justify-center mb-4 text-green-400">
+                                        <Camera className="w-16 h-16" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-center text-green-400 mb-2">Galereya</h3>
+                                    <p className="text-center text-gray-300 text-sm">Foto va videolar</p>
+                                </div>
+
+                                {/* Aloqa */}
+                                <div 
+                                    onClick={() => scrollToSection('contact')}
+                                    className="bg-gradient-to-br from-red-900/40 to-orange-900/40 backdrop-blur-lg p-6 rounded-2xl border border-red-500/30 hover:border-red-500 cursor-pointer hover:scale-105 transition-all group"
+                                >
+                                    <div className="flex justify-center mb-4 text-red-400">
+                                        <Mail className="w-16 h-16" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-center text-red-400 mb-2">Aloqa</h3>
+                                    <p className="text-center text-gray-300 text-sm">Bog'lanish</p>
+                                </div>
+
+                                {/* Mukofotlar */}
+                                <div 
+                                    onClick={() => setSelectedAboutModal('awards')}
+                                    className="bg-gradient-to-br from-yellow-900/40 to-amber-900/40 backdrop-blur-lg p-6 rounded-2xl border border-yellow-500/30 hover:border-yellow-500 cursor-pointer hover:scale-105 transition-all group"
+                                >
+                                    <div className="flex justify-center mb-4 text-yellow-400">
+                                        <Award className="w-16 h-16" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-center text-yellow-400 mb-2">Mukofotlar</h3>
+                                    <p className="text-center text-gray-300 text-sm">Yutuqlar va e'tiroflar</p>
+                                </div>
+                            </div>
+
+                            {/* Qisqacha ma'lumot */}
+                            <div className="text-center mt-12">
+                                <p className="text-xl md:text-2xl text-gray-300 mb-4 font-medium">Ijodkor | Huquqshunos</p>
+                                <p className="text-lg text-amber-400 italic">"So'z san'ati orqali qalblarni birlashtiruvchi"</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Hero Section */}
+                    <section id="home" className="relative z-10 min-h-screen flex flex-col md:flex-row items-center justify-center px-6 gap-10 pt-20">
+                        
+                        {/* 1. Shoirning rasmi */}
+                        <div 
+                            onClick={() => setSelectedAboutModal('bio')}
+                            className="relative animate-fade-in order-1 md:order-2 cursor-pointer hover:scale-105 transition-transform"
+                        >
+                            <div className="absolute -inset-4 bg-gradient-to-tr from-amber-600 via-orange-500 to-red-600 rounded-full blur-xl opacity-30 animate-rotate-glow"></div>
+                            <div className="relative w-64 h-64 md:w-80 md:h-80 rounded-full border-4 border-amber-500 overflow-hidden shadow-2xl">
+                                <img 
+                                    src="qaha.jpg"
+                                    alt="Qahramon Sayyid" 
+                                    className="w-full h-full object-cover animate-pulse-slow"
+                                />
+                            </div>
+                        </div>
+
+                        {/* 2. Matnlar qismi */}
+                        <div className="text-center md:text-left max-w-2xl animate-fade-in order-2 md:order-1">
+                            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-amber-200 via-orange-300 to-red-400 bg-clip-text text-transparent">
+                                QAHRAMON SAYYID
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-300 mb-4 font-medium">Ijodkor | Huquqshunos |</p>
+                            <p className="text-lg text-amber-400 italic mb-8">"So'z san'ati orqali qalblarni birlashtiruvchi"</p>
+                            
+                            <div className="flex flex-wrap justify-center md:justify-start gap-4">
+                                <a href="#poems" className="bg-gradient-to-r from-amber-500 to-orange-600 px-8 py-3 rounded-full font-semibold hover:scale-105 transition-transform">
+                                    She'rlarni o'qish
+                                </a>
+                                <a href="#contact" className="border-2 border-amber-500 px-8 py-3 rounded-full font-semibold hover:bg-amber-500/20 transition-all">
+                                    Bog'lanish
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* About Section */}
+                    <section id="about" className="relative z-10 min-h-screen py-20 px-6">
+                        <div className="max-w-6xl mx-auto">
+                            <h2 className="text-5xl font-bold mb-16 text-center bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                Shoir haqida
+                            </h2>
+                            
+                            <div className="grid md:grid-cols-2 gap-12 mb-16">
+                                <div 
+                                    onClick={() => setSelectedAboutModal('bio')}
+                                    className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 backdrop-blur-lg p-8 rounded-3xl border border-amber-500/30 cursor-pointer hover:border-amber-500 hover:scale-105 transition-all"
+                                >
+                                    <h3 className="text-3xl font-bold mb-6 text-amber-400">Biografiya</h3>
+                                    <div className="space-y-4 text-gray-300 leading-relaxed">
+                                        <p><strong className="text-amber-400">To'liq ismi:</strong> Qahramon Sattixo'jayev</p>
+                                        <p><strong className="text-amber-400">Taxallus:</strong> Qahramon Sayyid</p>
+                                        <p><strong className="text-amber-400">Tug'ilgan yil:</strong> 2004-yil</p>
+                                        <p><strong className="text-amber-400">Tug'ilgan joy:</strong> Namangan viloyati, Chortoq tumani, Alixon qishlog'i</p>
+                                        <p><strong className="text-amber-400">Ta'lim:</strong> Namangan Davlat Universiteti, Yuridik fakulteti, 4-bosqich talabasi</p>
+                                    </div>
+                                </div>
+
+                                <div 
+                                    onClick={() => setSelectedAboutModal('projects')}
+                                    className="bg-gradient-to-br from-red-900/30 to-orange-900/30 backdrop-blur-lg p-8 rounded-3xl border border-red-500/30 cursor-pointer hover:border-red-500 hover:scale-105 transition-all"
+                                >
+                                    <h3 className="text-3xl font-bold mb-6 text-red-400">Loyihalar</h3>
+                                    <div className="space-y-6">
+                                        <div className="border-l-4 border-amber-500 pl-4">
+                                            <h4 className="text-xl font-semibold text-amber-300 mb-2">TALABALAR KARVONI JURNALI</h4>
+                                            <p className="text-gray-300">Talabalarning ijodiy va intellektual salohiyatini rivojlantirishga qaratilgan jurnal.</p>
+                                        </div>
+                                        <div className="border-l-4 border-orange-500 pl-4">
+                                            <h4 className="text-xl font-semibold text-orange-300 mb-2">IJOD MINBARI NOMLI ONLAYN SUHBAT DASTURI</h4>
+                                            <p className="text-gray-300">Ijodkorlar va yoshlarni birlashtiruvchi onlayn suhbat dasturi.</p>
+                                        </div>
+                                        <div className="border-l-4 border-red-500 pl-4">
+                                            <h4 className="text-xl font-semibold text-red-300 mb-2">YOSH QALAMKASHLAR KLUBI</h4>
+                                            <p className="text-gray-300">Yosh yozuvchilar va ijodkorlarni qo'llab-quvvatlovchi klub.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Awards */}
+                            <div className="mb-16">
+                                <h3 className="text-3xl font-bold mb-8 text-center text-amber-400">Mukofotlar va Yutuqlar</h3>
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    <div 
+                                        onClick={() => setSelectedAboutModal('awards')}
+                                        className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/40 hover:scale-105 transition-transform cursor-pointer"
+                                    >
+                                        <div className="flex justify-center mb-4"><Award /></div>
+                                        <p className="text-center text-sm text-gray-200">"IJODIY IZLANISHDAGI YOSH" KO'KRAK NISHON SOHIBI</p>
+                                    </div>
+                                    <div 
+                                        onClick={() => setSelectedAboutModal('awards')}
+                                        className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/40 hover:scale-105 transition-transform cursor-pointer"
+                                    >
+                                        <div className="flex justify-center mb-4"><Award /></div>
+                                        <p className="text-center text-sm text-gray-200">"YILNING ENG FAOL IJODKOR TALABASI" NOMINATSIYASI</p>
+                                    </div>
+                                    <div 
+                                        onClick={() => setSelectedAboutModal('awards')}
+                                        className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/40 hover:scale-105 transition-transform cursor-pointer"
+                                    >
+                                        <div className="flex justify-center mb-4"><Award /></div>
+                                        <p className="text-center text-sm text-gray-200">RESPUBLIKA BOSQICHI G'OLIBI - 2025</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Books */}
+                            <div>
+                                <h3 className="text-3xl font-bold mb-8 text-center text-orange-400">Nashr etilgan kitoblar - 2025</h3>
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div 
+                                        onClick={() => setSelectedAboutModal('books')}
+                                        className="bg-gradient-to-br from-orange-900/40 to-red-900/40 backdrop-blur-lg p-8 rounded-2xl border border-orange-500/40 hover:scale-105 transition-transform cursor-pointer"
+                                    >
+                                        <div className="flex justify-center mb-4"><Book /></div>
+                                        <h4 className="text-xl font-bold text-center mb-2 text-orange-300">NAMANGAN MASHRAB NASHRIYOTI</h4>
+                                        <p className="text-center text-gray-300">Nashriyot: Namangan Mashrab</p>
+                                        <p className="text-center text-amber-400">2025-yil</p>
+                                    </div>
+                                    <div 
+                                        onClick={() => setSelectedAboutModal('books')}
+                                        className="bg-gradient-to-br from-orange-900/40 to-red-900/40 backdrop-blur-lg p-8 rounded-2xl border border-orange-500/40 hover:scale-105 transition-transform cursor-pointer"
+                                    >
+                                        <div className="flex justify-center mb-4"><Book /></div>
+                                        <h4 className="text-xl font-bold text-center mb-2 text-orange-300">AMAZON LULU NASHRIYOTI</h4>
+                                        <p className="text-center text-gray-300">Nashriyot: Xalqaro Amazon Lulu</p>
+                                        <p className="text-center text-amber-400">2025-yil</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Poems Section */}
+                    <section id="poems" className="relative z-10 min-h-screen py-20 px-6">
+                        <div className="w-full mx-auto">
+                            <h2 className="text-5xl font-bold mb-16 text-center bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                She'rlar to'plami
+                            </h2>
+                            
+                            <div className="grid grid-cols-5 gap-3">
+                                {poems.map((poem) => (
+                                    <div key={poem.id} className="group bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-lg rounded-xl overflow-hidden border border-amber-500/30 hover:border-amber-500 transition-all flex flex-col min-h-[350px]">
+                                        <div className="relative h-40 overflow-hidden">
+                                            <img src={poem.image} alt={poem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                                        </div>
+                                        <div className="p-3 flex flex-col flex-1">
+                                            <div className="flex items-center text-amber-400 text-xs mb-1">
+                                                <div className="mr-1"><Calendar /></div>
+                                                {poem.date}
+                                            </div>
+                                            <h3 className="text-base font-bold mb-1 text-amber-300 flex-shrink-0 line-clamp-2">{poem.title}</h3>
+                                            <p className="text-gray-300 text-sm italic mb-2 flex-1 line-clamp-2">{poem.excerpt}</p>
+                                            <button 
+                                                onClick={() => setSelectedPoem(poem)}
+                                                className="bg-gradient-to-r from-amber-500 to-orange-600 px-3 py-1.5 rounded-full text-sm font-semibold hover:scale-105 transition-transform w-full mt-auto"
+                                            >
+                                                To'liq o'qish
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Poem Modal */}
+                    {selectedPoem && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center px-6 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedPoem(null)}>
+                            <div className="bg-gradient-to-br from-gray-900 to-black border-2 border-amber-500 rounded-3xl max-w-4xl w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
+                                <button onClick={() => setSelectedPoem(null)} className="absolute top-4 right-4 text-amber-400 hover:text-amber-300 text-2xl">&times;</button>
+                                <img src={selectedPoem.image} alt={selectedPoem.title} className="w-full h-48 object-cover rounded-2xl mb-4" />
+                                <h3 className="text-2xl font-bold mb-3 text-amber-400">{selectedPoem.title}</h3>
+                                <div className="text-gray-300 text-sm leading-relaxed whitespace-pre-line mb-4 max-h-[50vh] overflow-y-auto">
+                                    {selectedPoem.fullPoem}
+                                </div>
+                                <div className="flex items-center text-amber-400 text-sm">
+                                    <div className="mr-2"><Calendar /></div>
+                                    {selectedPoem.date}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Gallery Section */}
+                    <section id="gallery" className="relative z-10 min-h-screen py-20 px-6">
+                        <div className="max-w-7xl mx-auto">
+                            {/* Foto Galereya */}
+                            <div className="mb-20">
+                                <h2 className="text-5xl font-bold mb-12 text-center bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                    Foto Galereya
+                                </h2>
+                                
+                                <div className="grid md:grid-cols-3 gap-6">
+                                    {galleryImages.map((image) => (
+                                        <div 
+                                            key={image.id} 
+                                            onClick={() => setSelectedGalleryItem({ type: 'image', url: image.url, title: image.title })}
+                                            className="relative h-80 rounded-2xl overflow-hidden group border-2 border-amber-500/30 hover:border-amber-500 transition-all cursor-pointer"
+                                        >
+                                            <img 
+                                                src={image.url}
+                                                alt={image.title}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "https://via.placeholder.com/600x400?text=Rasm+yuklanmadi";
+                                                }}
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+                                                <div className="flex items-center text-white">
+                                                    <Camera className="w-6 h-6 mr-2" />
+                                                    <span className="font-semibold">{image.title}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Video Lavhalar */}
+                            <div>
+                                <h2 className="text-5xl font-bold mb-12 text-center bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                                    Video Lavhalar
+                                </h2>
+                                
+                                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {galleryVideos.map((video) => (
+                                        <div 
+                                            key={video.id} 
+                                            onClick={() => setSelectedGalleryItem({ 
+                                                type: 'video', 
+                                                url: video.url, 
+                                                title: video.title,
+                                                cover: video.cover,
+                                                aspectRatio: video.aspectRatio
+                                            })}
+                                            className="relative rounded-2xl overflow-hidden group border-2 border-orange-500/30 hover:border-orange-500 transition-all cursor-pointer hover:scale-105 bg-gray-900"
+                                            style={{ aspectRatio: video.aspectRatio }}
+                                        >
+                                            {/* Video cover/poster */}
+                                            <div className="relative w-full h-full">
+                                                <img 
+                                                    src={video.cover}
+                                                    alt={video.title}
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = "https://via.placeholder.com/1280x720?text=Video+Cover";
+                                                    }}
+                                                />
+                                                
+                                                {/* Play button overlay */}
+                                                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                                    <div className="bg-orange-500/90 group-hover:bg-orange-500 rounded-full p-4 transition-all transform group-hover:scale-110">
+                                                        <Video className="w-12 h-12 text-white" />
+                                                    </div>
+                                                </div>
+                                                
+                                                {/* Video title */}
+                                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                                                    <h3 className="text-white font-semibold text-lg">{video.title}</h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </section>
+
+                    {/* --- BLOG SECTION START --- */}
+<section id="blog" className="relative z-10 min-h-screen py-20 px-6">
+    <div className="max-w-6xl mx-auto">
+        <h2 className="text-5xl font-bold mb-16 text-center bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+            Kundalik Blog
+        </h2>
+        
+        <div className="space-y-6">
+            {blogPosts.map((post) => (
+                <div 
+                    key={post.id} 
+                    onClick={() => setSelectedBlog(post)} 
+                    className="group bg-gradient-to-br from-gray-900/60 to-black/60 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/20 hover:border-amber-500/50 transition-all cursor-pointer hover:scale-[1.01]"
+                >
+                    <div className="flex items-center mb-4 text-amber-500/70">
+                        <Calendar className="w-5 h-5 mr-2" />
+                        <span>{post.date}</span>
+                    </div>
+                    <h4 className="text-2xl font-bold mb-2 text-amber-300 group-hover:text-amber-400 transition-colors">
+                        {post.title}
+                    </h4>
+                    <p className="text-gray-400 line-clamp-2 italic">{post.excerpt}</p>
+                    <div className="mt-4 text-amber-500 text-sm font-semibold flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        To'liq o'qish <span className="ml-2">→</span>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+
+    {/* --- BLOG MODAL (Oyna ochilishi) --- */}
+    {selectedBlog && (
+        <div 
+            className="fixed inset-0 z-[999] flex items-center justify-center px-4 bg-black/95 backdrop-blur-md"
+            onClick={() => setSelectedBlog(null)}
+        >
+            <div 
+                className="bg-zinc-950 border border-amber-500/40 rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {/* Yopish tugmasi */}
+                <button 
+                    onClick={() => setSelectedBlog(null)}
+                    className="absolute top-4 right-4 z-10 bg-black/50 text-amber-500 hover:text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl border border-amber-500/20"
+                >
+                    &times;
+                </button>
+
+                {/* Blog rasmi (Agar rasm bo'lsa) */}
+                <div className="w-full h-72 overflow-hidden">
+                    <img 
+                        src={selectedBlog.image || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=2070'} 
+                        className="w-full h-full object-cover"
+                        alt={selectedBlog.title}
+                    />
+                </div>
+
+                {/* Kontent */}
+                <div className="p-8 md:p-12">
+                    <div className="flex items-center text-amber-500/80 mb-4 font-mono">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        {selectedBlog.date}
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-bold text-amber-400 mb-8 leading-tight">
+                        {selectedBlog.title}
+                    </h2>
+                    <div className="text-gray-200 text-lg leading-relaxed space-y-4 whitespace-pre-line italic">
+                        {selectedBlog.fullContent || selectedBlog.excerpt}
+                    </div>
+                </div>
+            </div>
+        </div>
+    )}
+</section>
+{/* --- BLOG SECTION END --- */}
+
+                    {/* Contact Section */}
+                    <section id="contact" className="relative z-10 min-h-screen py-20 px-6">
+                        <div className="max-w-4xl mx-auto">
+                            <h2 className="text-5xl font-bold mb-16 text-center bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                                Bog'lanish
+                            </h2>
+                            
+                            <div className="bg-gradient-to-br from-amber-900/30 to-orange-900/30 backdrop-blur-lg p-10 rounded-3xl border border-amber-500/30">
+                                <div className="space-y-6">
+                                    <div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="Ismingiz"
+                                            className="w-full bg-black/50 border border-amber-500/50 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <input 
+                                            type="email" 
+                                            placeholder="Email manzilingiz"
+                                            className="w-full bg-black/50 border border-amber-500/50 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <textarea 
+                                            placeholder="Xabaringiz..."
+                                            rows="6"
+                                            className="w-full bg-black/50 border border-amber-500/50 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+                                        ></textarea>
+                                    </div>
+                                    <button className="w-full bg-gradient-to-r from-amber-500 to-orange-600 py-4 rounded-xl font-semibold hover:scale-105 transition-transform flex items-center justify-center">
+                                        <div className="mr-2"><Mail /></div>
+                                        Xabar yuborish
+                                    </button>
+                                </div>
+
+                                <div className="mt-12 pt-8 border-t border-amber-500/30">
+                                    <h3 className="text-2xl font-bold mb-6 text-center text-amber-400">Ijtimoiy tarmoqlar</h3>
+                                    <div className="flex justify-center space-x-6">
+                                        <a href="https://t.me/qahramon_sayyid" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-full hover:scale-110 transition-transform">
+                                            <Send />
+                                        </a>
+                                        <a href="https://instagram.com/qahramon_sayyid" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-pink-500 to-purple-600 p-4 rounded-full hover:scale-110 transition-transform">
+                                            <Instagram />
+                                        </a>
+                                        <a href="https://youtube.com/@qahramon_sayyid" target="_blank" rel="noopener noreferrer" className="bg-gradient-to-br from-red-500 to-red-600 p-4 rounded-full hover:scale-110 transition-transform">
+                                            <Youtube />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Gallery Modal */}
+                    {selectedGalleryItem && (
+                        <div 
+                            className="fixed inset-0 z-[999] flex items-center justify-center px-4 bg-black/95 backdrop-blur-md"
+                            onClick={() => {
+                                setSelectedGalleryItem(null);
+                                // Video to'xtatish
+                                const videos = document.querySelectorAll('video');
+                                videos.forEach(v => {
+                                    v.pause();
+                                    v.currentTime = 0;
+                                });
+                            }}
+                        >
+                            <div 
+                                className="bg-zinc-950 border border-amber-500/40 rounded-3xl max-w-6xl w-full max-h-[95vh] overflow-y-auto relative shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button 
+                                    onClick={() => {
+                                        setSelectedGalleryItem(null);
+                                        // Video to'xtatish
+                                        const videos = document.querySelectorAll('video');
+                                        videos.forEach(v => {
+                                            v.pause();
+                                            v.currentTime = 0;
+                                        });
+                                    }}
+                                    className="absolute top-4 right-4 z-10 bg-black/50 text-amber-500 hover:text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl border border-amber-500/20 hover:bg-amber-500/20 transition-all"
+                                >
+                                    &times;
+                                </button>
+
+                                {selectedGalleryItem.type === 'image' ? (
+                                    <div className="p-4">
+                                        <img 
+                                            src={selectedGalleryItem.url}
+                                            alt={selectedGalleryItem.title || 'Rasm'}
+                                            className="w-full h-auto rounded-2xl max-h-[85vh] object-contain mx-auto"
+                                            onError={(e) => {
+                                                e.target.onerror = null;
+                                                e.target.src = "https://via.placeholder.com/1200x800?text=Rasm+yuklanmadi";
+                                            }}
+                                        />
+                                        {selectedGalleryItem.title && (
+                                            <h3 className="text-2xl font-bold text-amber-400 mt-4 text-center">{selectedGalleryItem.title}</h3>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="p-4">
+                                        <div 
+                                            className="w-full bg-black rounded-2xl overflow-hidden relative"
+                                            style={{ 
+                                                aspectRatio: selectedGalleryItem.aspectRatio || '16/9',
+                                                maxHeight: '85vh'
+                                            }}
+                                        >
+                                            <video 
+                                                src={selectedGalleryItem.url}
+                                                controls
+                                                className="w-full h-full object-contain"
+                                                poster={selectedGalleryItem.cover}
+                                                preload="metadata"
+                                                onError={(e) => {
+                                                    const target = e.target;
+                                                    target.style.display = 'none';
+                                                    const errorDiv = document.createElement('div');
+                                                    errorDiv.className = 'flex flex-col items-center justify-center h-full text-white p-8';
+                                                    errorDiv.innerHTML = `
+                                                        <svg class="w-16 h-16 mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                        </svg>
+                                                        <p class="text-xl font-semibold mb-2">Video yuklanmadi</p>
+                                                        <p class="text-gray-400">${selectedGalleryItem.url}</p>
+                                                    `;
+                                                    target.parentElement.appendChild(errorDiv);
+                                                }}
+                                            >
+                                                <source src={selectedGalleryItem.url} type="video/mp4" />
+                                                <source src={selectedGalleryItem.url} type="video/webm" />
+                                                Sizning brauzeringiz videoni qo'llab-quvvatlamaydi.
+                                            </video>
+                                        </div>
+                                        {selectedGalleryItem.title && (
+                                            <h3 className="text-2xl font-bold text-amber-400 mt-4 text-center">{selectedGalleryItem.title}</h3>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* About Info Modal */}
+                    {selectedAboutModal && (
+                        <div 
+                            className="fixed inset-0 z-[999] flex items-center justify-center px-4 bg-black/95 backdrop-blur-md"
+                            onClick={() => setSelectedAboutModal(null)}
+                        >
+                            <div 
+                                className="bg-zinc-950 border border-amber-500/40 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <button 
+                                    onClick={() => setSelectedAboutModal(null)}
+                                    className="absolute top-4 right-4 z-10 bg-black/50 text-amber-500 hover:text-white w-10 h-10 rounded-full flex items-center justify-center text-2xl border border-amber-500/20"
+                                >
+                                    &times;
+                                </button>
+
+                                <div className="p-8 md:p-12">
+                                    {selectedAboutModal === 'bio' && (
+                                        <>
+                                            <div className="relative w-48 h-48 mx-auto mb-8">
+                                                <div className="absolute -inset-4 bg-gradient-to-tr from-amber-600 via-orange-500 to-red-600 rounded-full blur-xl opacity-30 animate-rotate-glow"></div>
+                                                <div className="relative rounded-full border-4 border-amber-500 overflow-hidden">
+                                                    <img 
+                                                        src="qaha.jpg"
+                                                        alt="Qahramon Sayyid" 
+                                                        className="w-48 h-48 object-cover animate-pulse-slow"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <h2 className="text-4xl font-bold mb-8 text-center text-amber-400">Biografiya</h2>
+                                            <div className="space-y-4 text-gray-300 leading-relaxed text-lg">
+                                                <p><strong className="text-amber-400">To'liq ismi:</strong> Qahramon Sattixo'jayev</p>
+                                                <p><strong className="text-amber-400">Taxallus:</strong> Qahramon Sayyid</p>
+                                                <p><strong className="text-amber-400">Tug'ilgan yil:</strong> 2004-yil</p>
+                                                <p><strong className="text-amber-400">Tug'ilgan joy:</strong> Namangan viloyati, Chortoq tumani, Alixon qishlog'i</p>
+                                                <p><strong className="text-amber-400">Ta'lim:</strong> Namangan Davlat Universiteti, Yuridik fakulteti, 4-bosqich talabasi</p>
+                                                <div className="mt-8 pt-6 border-t border-amber-500/30">
+                                                    <p className="text-gray-400 italic">Qahramon Sayyid - bu yosh shoir va ijodkor bo'lib, o'z ijodiy faoliyatini 2020-yillardan boshlagan. Uning she'rlari chuqur falsafiy mazmun va go'zal badiiy so'zlar bilan ajralib turadi.</p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {selectedAboutModal === 'projects' && (
+                                        <>
+                                            <h2 className="text-4xl font-bold mb-8 text-center text-red-400">Loyihalar va Faoliyat</h2>
+                                            <div className="space-y-6">
+                                                <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 p-6 rounded-2xl border-l-4 border-amber-500">
+                                                    <h3 className="text-2xl font-bold text-amber-300 mb-3">TALABALAR KARVONI JURNALI</h3>
+                                                    <p className="text-gray-300 leading-relaxed">Talabalarning ijodiy va intellektual salohiyatini rivojlantirishga qaratilgan jurnal. Bu jurnal orqali talabalar o'z ijodlarini nashr qilish, tan olinish va rivojlanish imkoniyatiga ega bo'lishadi.</p>
+                                                </div>
+                                                <div className="bg-gradient-to-r from-blue-900/30 to-cyan-900/30 p-6 rounded-2xl border-l-4 border-blue-500">
+                                                    <h3 className="text-2xl font-bold text-blue-300 mb-3">IJOD MINBARI NOMLI ONLAYN SUHBAT DASTURI</h3>
+                                                    <p className="text-gray-300 leading-relaxed">Ijodkorlar va yoshlarni birlashtiruvchi onlayn suhbat dasturi. Bu dastur orqali ijodkorlar o'z tajribalarini baham ko'rish, yosh ijodkorlarni qo'llab-quvvatlash va adabiy muhitni rivojlantirish imkoniyati yaratiladi.</p>
+                                                </div>
+                                                <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-6 rounded-2xl border-l-4 border-purple-500">
+                                                    <h3 className="text-2xl font-bold text-purple-300 mb-3">YOSH QALAMKASHLAR KLUBI</h3>
+                                                    <p className="text-gray-300 leading-relaxed">Yosh yozuvchilar va ijodkorlarni qo'llab-quvvatlovchi klub. Klub a'zolari birgalikda ijod qilish, adabiy muhokamalar o'tkazish va o'z mahoratlarini oshirish imkoniyatiga ega bo'lishadi.</p>
+                                                </div>
+                                                <div className="bg-gradient-to-r from-green-900/30 to-emerald-900/30 p-6 rounded-2xl border-l-4 border-green-500">
+                                                    <h3 className="text-2xl font-bold text-green-300 mb-3">KELAJAK LIDERLARI JAMOASI</h3>
+                                                    <p className="text-gray-300 leading-relaxed">Yosh liderlarni shakllantirish va rivojlantirishga qaratilgan jamoaviy faoliyat. Bu jamoaning maqsadi kelajakni shakllantiruvchi, ijodiy va samarali yetakchilarni tayyorlash.</p>
+                                                </div>
+                                                <div className="bg-gradient-to-r from-red-900/30 to-orange-900/30 p-6 rounded-2xl border-l-4 border-red-500">
+                                                    <h3 className="text-2xl font-bold text-red-300 mb-3">HUQUQIY SAVODXONLIK TARG'IBOTCHISI</h3>
+                                                    <p className="text-gray-300 leading-relaxed">Aholining huquqiy savodxonligini oshirish bo'yicha keng ko'lamli targ'ibot ishlarini amalga oshirgan. Ommaviy tadbirlar, ma'ruzalar, seminarlar va huquqiy maslahatlar tashkil etgan. Aholi orasida huquqiy bilim va tushunchalarni yoyishga hissa qo'shgan.</p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {selectedAboutModal === 'awards' && (
+                                        <>
+                                            <h2 className="text-4xl font-bold mb-8 text-center text-amber-400">Mukofotlar va Yutuqlar</h2>
+                                            <div className="grid md:grid-cols-2 gap-6">
+                                                <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/40">
+                                                    <div className="flex justify-center mb-4"><Award className="w-12 h-12 text-amber-400" /></div>
+                                                    <h3 className="text-xl font-bold text-center mb-2 text-amber-300">"IJODIY IZLANISHDAGI YOSH" KO'KRAK NISHON SOHIBI</h3>
+                                                    <p className="text-center text-gray-300 text-sm">Bu mukofot ijodiy izlanishlar va yoshlikning ijodiy rivojlanishidagi muhim yutuqlari uchun beriladi.</p>
+                                                </div>
+                                                <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/40">
+                                                    <div className="flex justify-center mb-4"><Award className="w-12 h-12 text-amber-400" /></div>
+                                                    <h3 className="text-xl font-bold text-center mb-2 text-amber-300">"YILNING ENG FAOL IJODKOR TALABASI" NOMINATSIYASI</h3>
+                                                    <p className="text-center text-gray-300 text-sm">Universitet talabalari orasida eng faol va ijodiy talaba sifatida tan olingan.</p>
+                                                </div>
+                                                <div className="bg-gradient-to-br from-amber-900/40 to-yellow-900/40 backdrop-blur-lg p-6 rounded-2xl border border-amber-500/40 md:col-span-2">
+                                                    <div className="flex justify-center mb-4"><Award className="w-12 h-12 text-amber-400" /></div>
+                                                    <h3 className="text-xl font-bold text-center mb-2 text-amber-300">RESPUBLIKA BOSQICHI G'OLIBI - 2025</h3>
+                                                    <p className="text-center text-gray-300">Respublika miqyosida o'tkazilgan ijodiy tanlovda birinchi o'rinni egallab, g'olib bo'lgan.</p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {selectedAboutModal === 'books' && (
+                                        <>
+                                            <h2 className="text-4xl font-bold mb-8 text-center text-orange-400">Nashr etilgan kitoblar - 2025</h2>
+                                            <div className="grid md:grid-cols-2 gap-8">
+                                                <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 backdrop-blur-lg p-8 rounded-2xl border border-orange-500/40">
+                                                    <div className="flex justify-center mb-4"><Book className="w-16 h-16 text-orange-400" /></div>
+                                                    <h3 className="text-2xl font-bold text-center mb-3 text-orange-300">NAMANGAN MASHRAB NASHRIYOTI</h3>
+                                                    <p className="text-center text-gray-300 mb-2">Nashriyot: Namangan Mashrab</p>
+                                                    <p className="text-center text-amber-400 font-semibold">2025-yil</p>
+                                                    <p className="text-center text-gray-400 text-sm mt-4">O'zbekistonda nashr etilgan birinchi kitob to'plami</p>
+                                                </div>
+                                                <div className="bg-gradient-to-br from-orange-900/40 to-red-900/40 backdrop-blur-lg p-8 rounded-2xl border border-orange-500/40">
+                                                    <div className="flex justify-center mb-4"><Book className="w-16 h-16 text-orange-400" /></div>
+                                                    <h3 className="text-2xl font-bold text-center mb-3 text-orange-300">AMAZON LULU NASHRIYOTI</h3>
+                                                    <p className="text-center text-gray-300 mb-2">Nashriyot: Xalqaro Amazon Lulu</p>
+                                                    <p className="text-center text-amber-400 font-semibold">2025-yil</p>
+                                                    <p className="text-center text-gray-400 text-sm mt-4">Xalqaro miqyosda nashr etilgan kitob to'plami</p>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Footer */}
+                    <footer className="relative z-10 bg-black/80 backdrop-blur-lg py-8 px-6 border-t border-amber-500/30">
+                        <div className="max-w-7xl mx-auto text-center">
+                            <p className="text-gray-400">&copy; 2025 Qahramon Sayyid. Barcha huquqlar himoyalangan.</p>
+                            <p className="text-amber-400 mt-2 italic">"So'z - qalb ko'zgusi, she'r - ruh ovozi"</p>
+                        </div>
+                    </footer>
+
+                    {/* Chatbot */}
+                    <div className="fixed bottom-4 right-4 z-50">
+                        {!chatOpen && (
+                            <button 
+                                onClick={() => setChatOpen(true)}
+                                className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 rounded-full shadow-lg hover:scale-110 transition-transform"
+                            >
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                            </button>
+                        )}
+                        {chatOpen && (
+                            <div className="bg-gray-900 border border-amber-500 rounded-2xl shadow-2xl w-80 h-96 flex flex-col">
+                                <div className="bg-gradient-to-r from-amber-500 to-orange-600 p-4 rounded-t-2xl flex justify-between items-center">
+                                    <h3 className="text-white font-bold">Qahramon Sayyid Chatbot</h3>
+                                    <button onClick={() => setChatOpen(false)} className="text-white hover:text-gray-300">&times;</button>
+                                </div>
+                                <div className="flex-1 p-4 overflow-y-auto space-y-2">
+                                    {messages.map((msg, index) => (
+                                        <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                            <div className={`max-w-xs p-2 rounded-lg ${msg.sender === 'user' ? 'bg-amber-500 text-white' : 'bg-gray-700 text-gray-300'}`}>
+                                                {msg.text}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="p-4 border-t border-gray-700">
+                                    <div className="flex">
+                                        <input 
+                                            type="text" 
+                                            value={userInput} 
+                                            onChange={(e) => setUserInput(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                            placeholder="Savolingizni yozing..."
+                                            className="flex-1 p-2 bg-gray-800 text-white rounded-l-lg border border-gray-600 focus:outline-none focus:border-amber-500"
+                                        />
+                                        <button 
+                                            onClick={sendMessage}
+                                            className="bg-amber-500 hover:bg-amber-600 p-2 rounded-r-lg transition-colors"
+                                        >
+                                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<QahramonSayyidWebsite />);
+
+    </script>
+</body>
+</html>
